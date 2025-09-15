@@ -1,0 +1,107 @@
+import groovy.json.JsonSlurper
+
+pipeline {
+    agent any
+
+    parameters {
+        string(name: 'APIGEE_ORG', defaultValue: 'corp-apigee')
+        string(name: 'APIGEE_ENV', defaultValue: 'dev')
+        string(name: 'API_NAME', defaultValue: 'llm-token-limits')
+        string(name: 'APIGEE_HOST', defaultValue: 'api.prftgcpdemo.ai')
+        string(name: 'REGION', defaultValue: 'us-central1')
+        string(name: 'SERVICE_ACCOUNT', defaultValue: 'api-proxy-logging@corp-apigee.iam.gserviceaccount.com')
+    }
+
+    stages {
+        stage('Configure Apigee Credentials') {
+            steps {
+                script {
+                    withCredentials([file(credentialsId: 'corp-apigee-cicd-jenkins', variable: 'GOOGLE_APPLICATION_CREDENTIALS')]) {
+                        env.SA_TOKEN=sh(script:'gcloud auth application-default print-access-token', returnStdout: true).trim()
+                    }
+                }
+            }
+        }
+
+        // stage('Install Dependencies') {
+        //     steps {
+        //         nodejs(nodeJSInstallationName: 'NodeJS 23.6.0') {
+        //             sh 'npm install'
+        //         }
+        //     }
+        // }
+
+        // stage('Static Code Analysis') {
+        //     steps {
+        //         nodejs(nodeJSInstallationName: 'NodeJS 23.6.0') {
+        //             sh 'npm run eslint > eslint-out.html'
+        //             publishHTML(target: [
+        //                 allowMissing: false,
+        //                 alwaysLinkToLastBuild: true,
+        //                 keepAll: false,
+        //                 reportDir: '.',
+        //                 reportFiles: 'eslint-out.html',
+        //                 reportName: 'ESLint Report'
+        //             ])
+        //             sh 'rm eslint-out.html'
+
+        //             sh 'npm run apigeelint > apigeelint-out.html'
+        //             publishHTML(target: [
+        //                 allowMissing: false,
+        //                 alwaysLinkToLastBuild: true,
+        //                 keepAll: false,
+        //                 reportDir: '.',
+        //                 reportFiles: 'apigeelint-out.html',
+        //                 reportName: 'ApigeeLint Report'
+        //             ])
+        //             sh 'rm apigeelint-out.html'
+        //         }
+        //     }
+        // }
+
+        // stage('Upload API Bundle') {
+        //     steps {
+        //         dir('llm-token-limits') {
+        //             script {
+        //                 sh "rm -f ${params.API_NAME}-${params.API_VERSION}.zip"
+        //                 sh "zip -r ${params.API_NAME}-${params.API_VERSION}.zip apiproxy"
+
+
+        //                 def bundle_upload_output = sh(script:"apigeecli apis create bundle -n ${params.API_NAME} -p ${params.API_NAME}-${params.API_VERSION}.zip -o ${params.APIGEE_ORG} -t ${env.SA_TOKEN}", returnStdout: true)
+        //                 def jsonSlurper = new JsonSlurper()
+        //                 def bundle_upload_response = jsonSlurper.parseText(bundle_upload_output)
+        //                 print("The uploaded revision is: " + bundle_upload_response.revision)
+        //                 env.DEPLOYMENT_REVISION = bundle_upload_response.revision
+        //             }
+        //         }
+        //     }
+        // }
+
+        stage('Deploy') {
+            steps {
+                script {
+                    dir('llm-token-limits') {
+                        sh './deploy-llm-token-limits.sh'
+                    }
+                }
+            }
+        }
+
+        // stage('Integration Tests') {
+        //     steps {
+        //         script {
+        //             nodejs(nodeJSInstallationName: 'NodeJS 23.6.0') {
+        //                 try {
+        //                     sh "npm run newman-integration-tests"
+        //                 } catch (Exception e) {
+        //                     currentBuild.result = 'FAILURE'
+        //                     throw e
+        //                 } finally {
+        //                     junit "**/newman_report/**/*.xml"
+        //                 }
+        //             }
+        //         }
+        //     }
+        // }
+    }
+}
