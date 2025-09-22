@@ -3,10 +3,14 @@ pipeline {
 
     parameters {
         string(name: 'PROJECT', defaultValue: 'corp-apigee')
+        string(name: 'REGION', defaultValue: 'us-central1')
+        string(name: 'MODEL_ID', defaultValue: 'gemini-2.0-flash')
+        string(name: 'EMBEDDINGS_MODEL_ID', defaultValue: 'text-embedding-005')
+        string(name: 'NEAREST_NEIGHBOR_DISTANCE', defaultValue: '0.95')
+        string(name: 'CACHE_ENTRY_TTL_SEC', defaultValue: '60')
         string(name: 'APIGEE_ENV', defaultValue: 'dev')
         string(name: 'API_NAME', defaultValue: 'llm-token-limits')
         string(name: 'APIGEE_HOST', defaultValue: 'api.prftgcpdemo.ai')
-        string(name: 'REGION', defaultValue: 'us-central1')
         string(name: 'SERVICE_ACCOUNT', defaultValue: 'api-proxy-logging@corp-apigee.iam.gserviceaccount.com')
     }
 
@@ -25,7 +29,7 @@ pipeline {
             steps {
                 script {
                     dir('llm-token-limits') {
-                        sh './deploy-llm-token-limits.sh'
+                        sh './deploy-llm-semantic-cache-v2.sh'
                     }
                 }
             }
