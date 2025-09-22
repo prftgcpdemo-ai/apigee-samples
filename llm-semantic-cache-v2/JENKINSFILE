@@ -12,6 +12,7 @@ pipeline {
         string(name: 'API_NAME', defaultValue: 'llm-token-limits')
         string(name: 'APIGEE_HOST', defaultValue: 'api.prftgcpdemo.ai')
         string(name: 'SERVICE_ACCOUNT', defaultValue: 'api-proxy-logging@corp-apigee.iam.gserviceaccount.com')
+        booleanParam(name: 'CREATE_INDEX', defaultValue: false)
     }
 
     stages {
@@ -25,14 +26,30 @@ pipeline {
             }
         }
 
-        stage('Deploy') {
+        stage('Create Vertex AI Index') {
+            when {
+                expression { return params.CREATE_INDEX == true }
+            }
             steps {
-                script {
-                    dir('llm-semantic-cache-v2') {
-                        sh './deploy-llm-semantic-cache-v2.sh'
-                    }
-                }
+                sh """
+                curl --location --request POST \
+                "https://$REGION-aiplatform.googleapis.com/v1/projects/$PROJECT/locations/$REGION/indexes" \
+                --header "Authorization: Bearer $SA_TOKEN" \
+                --header 'Content-Type: application/json' \
+                --data-raw \
+                '{"displayName": "semantic-cache-index", "description": "semantic-cache-index", "metadata": {"config": {"dimensions": "768","approximateNeighborsCount": 150,"distanceMeasureType": "DOT_PRODUCT_DISTANCE","featureNormType": "NONE","algorithmConfig": {"treeAhConfig": {"leafNodeEmbeddingCount": "10000","fractionLeafNodesToSearch": 0.05}},"shardSize": "SHARD_SIZE_MEDIUM"},},"indexUpdateMethod": "STREAM_UPDATE"}'
+                """
             }
         }
+
+        // stage('Deploy') {
+        //     steps {
+        //         script {
+        //             dir('llm-semantic-cache-v2') {
+        //                 sh './deploy-llm-semantic-cache-v2.sh'
+        //             }
+        //         }
+        //     }
+        // }
     }
 }
