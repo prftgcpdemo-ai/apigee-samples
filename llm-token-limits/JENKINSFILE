@@ -24,7 +24,7 @@ pipeline {
         stage('Deploy') {
             steps {
                 script {
-                    dir('llm-semantic-cache-v2') {
+                    dir('llm-token-limits') {
                         sh './deploy-llm-token-limits.sh'
                     }
                 }
