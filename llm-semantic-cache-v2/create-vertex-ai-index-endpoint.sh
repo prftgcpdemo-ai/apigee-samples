@@ -53,4 +53,4 @@ $INDEX_ENDPOINT_ID \
 --region=$REGION \
 --project=$PROJECT
 
-echo "Successfully created INDEX_ENDPOINT_ID=$INDEX_ENDPOINT_ID
+echo "Successfully created INDEX_ENDPOINT_ID=$INDEX_ENDPOINT_ID"
