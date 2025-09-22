@@ -32,9 +32,7 @@ pipeline {
             }
             steps {
                 dir('llm-semantic-cache-v2') {
-                    steps {
-                        sh './create-vertex-ai-index-endpoint.sh'
-                    }
+                    sh './create-vertex-ai-index-endpoint.sh'
                 }
             }
         }
