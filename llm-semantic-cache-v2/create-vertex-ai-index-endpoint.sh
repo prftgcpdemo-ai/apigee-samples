@@ -54,3 +54,5 @@ $INDEX_ENDPOINT_ID \
 --project=$PROJECT
 
 echo "Successfully created INDEX_ENDPOINT_ID=$INDEX_ENDPOINT_ID"
+
+

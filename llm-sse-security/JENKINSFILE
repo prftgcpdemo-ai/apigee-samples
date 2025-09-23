@@ -1,0 +1,32 @@
+pipeline {
+    agent any
+
+    parameters {
+        string(name: 'PROJECT_ID', defaultValue: 'corp-apigee')
+        string(name: 'MODEL_ARMOR_REGION', defaultValue: 'us-central1')
+        string(name: 'MODEL_ARMOR_TEMPLATE_ID', defaultValue: 'apigee-modelarmor-template')
+        string(name: 'APIGEE_ENV', defaultValue: 'dev')
+        string(name: 'APIGEE_HOST', defaultValue: 'api.prftgcpdemo.ai')
+        string(name: 'SERVICE_ACCOUNT_NAME', defaultValue: 'llm-sse-security-svc-acct')
+    }
+
+    stages {
+        stage('Configure Apigee Credentials') {
+            steps {
+                script {
+                    withCredentials([file(credentialsId: 'corp-apigee-cicd-jenkins', variable: 'GOOGLE_APPLICATION_CREDENTIALS')]) {
+                        env.SA_TOKEN=sh(script:'gcloud auth application-default print-access-token', returnStdout: true).trim()
+                    }
+                }
+            }
+        }
+
+        stage('Deploy') {
+            steps {
+                dir('llm-sse-security') {
+                    sh './deploy-llm-sse-security.sh'
+                }
+            }
+        }
+    }
+}
